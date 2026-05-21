@@ -1,15 +1,24 @@
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../models/student_info.dart';
 
 class ProfileController extends GetxController {
   bool isExpanded = false;
   bool isLogoutVisible = false;
+
   StudentInfo? student;
   Uint8List? imageBytes;
+
+  int? studentId;
+
+  @override
+  void onInit() {
+    studentId = Get.arguments;
+    loadStudentData();
+    super.onInit();
+  }
 
   void toggleExpanded() {
     isExpanded = !isExpanded;
@@ -27,39 +36,28 @@ class ProfileController extends GetxController {
   }
 
   Future<void> loadStudentData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? '';
-    final base64 = prefs.getString('profileImageBytes');
-
-    if (base64 != null) {
-      imageBytes = Uint8List.fromList(base64.codeUnits);
-    }
-
-    final response = await http.get(
-      Uri.parse("https://abdalkader.onrender.com/mobile/profile/"),
-      headers: {"Authorization": "Token $token"},
+    final url = Uri.parse(
+      "http://sharia-secondary-school.runasp.net/api/student/$studentId",
     );
+
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final profile = data['profile'];
-      student = StudentInfo.fromJson(profile);
-      update();
+      student = StudentInfo.fromJson(data);
     } else {
-      Get.snackbar("خطأ", "فشل تحميل بيانات الطالب");
+      print("خطأ في جلب بيانات الطالب");
     }
+
+    update();
   }
 
-  Future<void> updateProfileImage(Uint8List bytes) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profileImageBytes', String.fromCharCodes(bytes));
+  void updateProfileImage(Uint8List bytes) {
     imageBytes = bytes;
     update();
   }
 
-  Future<void> removeProfileImage() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('profileImageBytes');
+  void removeProfileImage() {
     imageBytes = null;
     update();
   }

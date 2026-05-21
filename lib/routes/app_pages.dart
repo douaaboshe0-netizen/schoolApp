@@ -76,7 +76,7 @@ class AppPages {
     GetPage(
       name: Routes.calendarPage,
       page: () => CalendarScreen(),
-      // binding: CalendarBinding(),
+      binding: CalendarBinding(),
     ),
   ];
 }

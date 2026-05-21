@@ -79,19 +79,23 @@ class _LoginScreenState extends State<LoginScreen> {
                               softWrap: true,
                             ),
                             const SizedBox(height: 25),
-                            buildTextField(
-                              label: 'الرقم التعريفي (ID)',
-                              icon: Icons.badge,
-                              isNumber: true,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'يرجى إدخال الرقم التعريفي';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) => controller.setId(value),
-                            ),
+
+                           buildTextField(
+  label: 'اسم المستخدم',
+  icon: Icons.person,
+  isNumber: false,
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'يرجى إدخال اسم المستخدم';
+    }
+    return null;
+  },
+  onChanged: (value) => controller.setId(value), 
+),
+
+
                             const SizedBox(height: 25),
+
                             buildTextField(
                               label: 'كلمة المرور',
                               icon: Icons.lock,
@@ -119,7 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 },
                               ),
                             ),
+
                             const SizedBox(height: 45),
+
                             ElevatedButton(
                               onPressed: () {
                                 if (formKey.currentState!.validate()) {
@@ -175,10 +181,11 @@ class _LoginScreenState extends State<LoginScreen> {
             onChanged: onChanged,
             validator: validator,
             obscureText: obscureText,
-            keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-            inputFormatters: isNumber
-                ? [FilteringTextInputFormatter.digitsOnly]
-                : [],
+
+        
+            keyboardType: TextInputType.text,
+            inputFormatters: [],
+
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               labelText: label,

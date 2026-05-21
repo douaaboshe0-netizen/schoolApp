@@ -1,54 +1,75 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../routes/app_pages.dart';
 
+class LoginResponse {
+  final int id;
+  final String username;
+  final int studentId;
+  final String name;
+  final String role;
+
+  LoginResponse({
+    required this.id,
+    required this.username,
+    required this.studentId,
+    required this.name,
+    required this.role,
+  });
+
+  factory LoginResponse.fromJson(Map<String, dynamic> json) {
+    return LoginResponse(
+      id: json['id'],
+      username: json['username'],
+      studentId: json['studentId'],
+      name: json['name'],
+      role: json['role'],
+    );
+  }
+}
+
 class LoginController extends GetxController {
-  String id = '';
+  String username = '';
   String password = '';
-  bool isLoading = false;
 
   void setId(String value) {
-    id = value;
-    update(); 
+    username = value.trim();
+    update();
   }
 
   void setPassword(String value) {
-    password = value;
-    update(); 
+    password = value.trim();
+    update();
   }
 
-  void login() async {
-    if (id.isEmpty || password.isEmpty) {
+  Future<void> login() async {
+    if (username.isEmpty || password.isEmpty) {
       Get.snackbar("خطأ", "يرجى إدخال البيانات كاملة");
       return;
     }
 
-    isLoading = true;
-    update(); 
-
-    final prefs = await SharedPreferences.getInstance();
-    final url = Uri.parse("http://abdalkadrbadran.runasp.net/api/auth/login");
+    final url = Uri.parse(
+      "http://sharia-secondary-school.runasp.net/api/user/login",
+    );
 
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
         body: jsonEncode({
-          "id": int.parse(id.trim()),
-          "password": password.trim(),
+          "username": username,
+          "password": password,
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
-        await prefs.setBool('isLoggedIn', true);
-        await prefs.setInt('userId', data["userId"]);
-        await prefs.setString('username', data["username"]);
-        await prefs.setString('role', data["role"]);
+        LoginResponse.fromJson(data);
 
         Get.snackbar(
           "",
@@ -57,9 +78,9 @@ class LoginController extends GetxController {
           backgroundColor: const Color.fromARGB(255, 147, 239, 107),
           duration: const Duration(seconds: 2),
           margin: const EdgeInsets.all(12),
-          titleText: Directionality(
+          titleText: const Directionality(
             textDirection: TextDirection.rtl,
-            child: const Text(
+            child: Text(
               "تم تسجيل الدخول بنجاح",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -76,13 +97,13 @@ class LoginController extends GetxController {
           "",
           "",
           snackPosition: SnackPosition.TOP,
-          backgroundColor: const Color.fromARGB(255, 147, 239, 107),
+          backgroundColor: const Color.fromARGB(255, 239, 107, 107),
           duration: const Duration(seconds: 3),
           margin: const EdgeInsets.all(12),
-          titleText: Directionality(
+          titleText: const Directionality(
             textDirection: TextDirection.rtl,
-            child: const Text(
-              "فشل تسجيل الدخول. تأكد من الرقم وكلمة المرور.",
+            child: Text(
+              "اسم المستخدم أو كلمة المرور غير صحيحة",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -93,28 +114,7 @@ class LoginController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar(
-        "",
-        "",
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color.fromARGB(255, 147, 239, 107),
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(12),
-        titleText: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Text(
-            "خطأ بالاتصال بالسيرفر: $e",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 16,
-            ),
-          ),
-        ),
-      );
+      Get.snackbar("خطأ", "حدث خطأ في الاتصال بالسيرفر");
     }
-
-    isLoading = false;
-    update(); 
   }
 }

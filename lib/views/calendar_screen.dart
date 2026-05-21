@@ -17,7 +17,6 @@ class CalendarScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-
         actions: [
           IconButton(
             icon: const Icon(Icons.arrow_forward, color: Colors.white),
@@ -38,6 +37,7 @@ class CalendarScreen extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // شريط الشهر
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -75,6 +75,7 @@ class CalendarScreen extends StatelessWidget {
 
               const SizedBox(height: 12),
 
+              // الصورة + الحديث + علامة الفلوبي
               GestureDetector(
                 onTap: () => flipped.toggle(),
                 child: AnimatedSwitcher(
@@ -97,21 +98,36 @@ class CalendarScreen extends StatelessWidget {
                             ),
                           ),
                         )
-                      : ClipRRect(
+                      : Stack(
                           key: const ValueKey(false),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            image,
-                            height: 140,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(
+                                image,
+                                height: 140,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            
+                            Positioned(
+                              top: 8,
+                              left: 8,
+                              child: Icon(
+                                Icons.flip_camera_android,
+                                color: Colors.white.withOpacity(0.85),
+                                size: 30,
+                              ),
+                            ),
+                          ],
                         ),
                 ),
               ),
 
               const SizedBox(height: 12),
 
+              // أيام الأسبوع
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
@@ -144,6 +160,7 @@ class CalendarScreen extends StatelessWidget {
 
               const SizedBox(height: 8),
 
+              // شبكة الأيام
               Expanded(
                 child: Directionality(
                   textDirection: TextDirection.rtl,
@@ -157,6 +174,7 @@ class CalendarScreen extends StatelessWidget {
                       ...List.generate(controller.daysInMonth.value, (index) {
                         final day = index + 1;
                         final isToday = controller.isToday(day);
+
                         return Container(
                           margin: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
