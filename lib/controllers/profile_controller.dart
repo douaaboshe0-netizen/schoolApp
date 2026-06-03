@@ -15,9 +15,19 @@ class ProfileController extends GetxController {
 
   @override
   void onInit() {
-    studentId = Get.arguments;
-    loadStudentData();
     super.onInit();
+
+    // استلام رقم الطالب من صفحة تسجيل الدخول
+    studentId = Get.arguments;
+
+    print("📌 studentId المستلم: $studentId");
+
+    if (studentId == null) {
+      print("❌ لم يتم استلام studentId");
+      return;
+    }
+
+    loadStudentData();
   }
 
   void toggleExpanded() {
@@ -40,13 +50,23 @@ class ProfileController extends GetxController {
       "http://sharia-secondary-school.runasp.net/api/student/$studentId",
     );
 
-    final response = await http.get(url);
+    print("🔍 طلب البيانات من: $url");
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      student = StudentInfo.fromJson(data);
-    } else {
-      print("خطأ في جلب بيانات الطالب");
+    try {
+      final response = await http.get(url);
+
+      print("📥 Status Code: ${response.statusCode}");
+      print("📥 Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        student = StudentInfo.fromJson(data);
+        print("✅ تم تحميل بيانات الطالب بنجاح");
+      } else {
+        print("❌ خطأ في جلب بيانات الطالب");
+      }
+    } catch (e) {
+      print("⚠️ خطأ أثناء الاتصال بالسيرفر: $e");
     }
 
     update();

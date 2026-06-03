@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -51,7 +52,7 @@ class LoginController extends GetxController {
     }
 
     final url = Uri.parse(
-      "http://sharia-secondary-school.runasp.net/api/user/login",
+      "https://sharia-secondary-school.runasp.net/api/user/login",
     );
 
     try {
@@ -61,15 +62,16 @@ class LoginController extends GetxController {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: jsonEncode({
-          "username": username,
-          "password": password,
-        }),
+        body: jsonEncode({"username": username, "password": password}),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        LoginResponse.fromJson(data);
+
+        final user = LoginResponse.fromJson(data);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        Get.offNamed(Routes.student, arguments: user.studentId);
 
         Get.snackbar(
           "",
@@ -90,8 +92,6 @@ class LoginController extends GetxController {
             ),
           ),
         );
-
-        Get.offNamed(Routes.student);
       } else {
         Get.snackbar(
           "",

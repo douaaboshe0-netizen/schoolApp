@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../controllers/profile_controller.dart';
+import '../models/student_info.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,13 +18,16 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   Uint8List? _imageBytes;
   final picker = ImagePicker();
-  final controller = Get.put(ProfileController());
+
+  
+  final controller = Get.find<ProfileController>();
 
   @override
   void initState() {
     super.initState();
     _loadSavedImage();
-    controller.loadStudentData();
+
+    
   }
 
   Future<void> _loadSavedImage() async {
@@ -203,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'ID: ${student.idNumber}',
+          'ID: ${student.id ?? ''}',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -214,28 +218,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         IconButton(
           icon: Icon(Icons.share, color: Colors.grey[700]),
           onPressed: () {
-            final s = controller.student;
+            final s = controller.student; 
             final message =
                 '''
 📌 معلومات الطالب:
 
 الاسم الكامل: ${s?.firstName ?? ''} ${s?.lastName ?? ''}
-الرقم التعريفي: ${s?.idNumber ?? ''}
-الفرع: ${s?.joinedGrade ?? ''}
-الشعبة: ${s?.oldRegistrationNumber ?? ''}
+الرقم التعريفي: ${s?.registrationNumber ?? ''}
+الرقم المدني: ${s?.civilRegistryNumber ?? ''}
 اسم الأب: ${s?.fatherName ?? ''}
-اسم الأم: ${s?.motherName ?? ''}
-اسم الجد: ${s?.grandfatherName ?? ''}
-المواليد: ${s?.birthDate ?? ''}
-مكان الولادة: ${s?.birthPlace ?? ''}
-مكان السكن: ${s?.registrationPlaceNumber ?? ''}
-الجنسية: ${s?.nationality ?? ''}
 وظيفة الأب: ${s?.fatherJob ?? ''}
-تاريخ الانضمام: ${s?.schoolJoinDate ?? ''}
-المدرسة السابقة: ${s?.previousHighSchool ?? ''}
-رقم وثيقة القبول: ${s?.admissionDocNumber ?? ''}
-تاريخ وثيقة القبول: ${s?.admissionDocDate ?? ''}
+اسم الأم: ${s?.motherName ?? ''}
+اسم الجد: ${s?.grandFatherName ?? ''}
+المواليد: ${s?.dateOfBirth ?? ''}
+مكان الولادة: ${s?.birthPlace ?? ''}
+مكان القيد المدني: ${s?.civilRegistryPlace ?? ''}
+الجنسية: ${s?.nationality ?? ''}
+تاريخ الانتساب للمدرسة: ${s?.schoolEnrollmentDate ?? ''}
 ''';
+
             Share.share(message);
           },
         ),
@@ -264,8 +265,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         width: 200,
                         height: 200,
                         child: QrImageView(
-                          data:
-                              'https://abdalkader.onrender.com/app.apk', //مؤقتا
+                          data: 'https://abdalkader.onrender.com/app.apk',
                           version: QrVersions.auto,
                         ),
                       ),
@@ -286,130 +286,80 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
     );
   }
-
-  Widget _buildInfoSection(
-    BuildContext context,
-    Color textColor,
-    Color cardColor,
-    Color shadowColor,
-    student,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          boxShadow: [BoxShadow(color: shadowColor, blurRadius: 6)],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: controller.toggleExpanded,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    AnimatedRotation(
-                      turns: controller.isExpanded ? 0.5 : 0.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: const Icon(Icons.keyboard_arrow_down, size: 28),
+Widget _buildInfoSection(
+  BuildContext context,
+  Color textColor,
+  Color cardColor,
+  Color shadowColor,
+  StudentInfo student,
+) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        boxShadow: [BoxShadow(color: shadowColor, blurRadius: 6)],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: controller.toggleExpanded,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  AnimatedRotation(
+                    turns: controller.isExpanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(Icons.keyboard_arrow_down, size: 28),
+                  ),
+                  Text(
+                    'المعلومات الشخصية',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: textColor,
                     ),
-                    Text(
-                      'المعلومات الشخصية',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: textColor,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            if (controller.isExpanded)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const SizedBox(height: 12),
-                    _infoLine(context, 'اسم الأب: ${student.fatherName ?? ''}'),
-                    _infoLine(context, 'اسم الأم: ${student.motherName ?? ''}'),
-                    _infoLine(context, 'المواليد: ${student.birthDate ?? ''}'),
-                    _infoLine(context, 'الفرع: ${student.joinedGrade ?? ''}'),
-                    _infoLine(
-                      context,
-                      'الشعبة: ${student.oldRegistrationNumber ?? ''}',
-                    ),
-                    _infoLine(context, 'المحافظة: ${student.birthPlace ?? ''}'),
-                    _infoLine(
-                      context,
-                      'مكان السكن: ${student.registrationPlaceNumber ?? ''}',
-                    ),
-                    _infoLine(context, 'الجنسية: ${student.nationality ?? ''}'),
-                    _infoLine(
-                      context,
-                      'اسم الجد: ${student.grandfatherName ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'وظيفة الأب: ${student.fatherJob ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'تاريخ الانضمام: ${student.schoolJoinDate ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'المدرسة السابقة: ${student.previousHighSchool ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'رقم وثيقة القبول: ${student.admissionDocNumber ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'تاريخ وثيقة القبول: ${student.admissionDocDate ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'تاريخ المغادرة: ${student.leavingDate ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'سبب المغادرة: ${student.leavingReason ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'المدرسة التالية: ${student.nextHighSchool ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'نوع وثيقة المغادرة: ${student.leavingDocType ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'رقم وثيقة المغادرة: ${student.leavingDocNumber ?? ''}',
-                    ),
-                    _infoLine(
-                      context,
-                      'تاريخ وثيقة المغادرة: ${student.leavingDocDate ?? ''}',
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+          ),
 
+          if (controller.isExpanded)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const SizedBox(height: 12),
+
+                  _infoLine(context, 'الرقم التسجيلي: ${student.registrationNumber}'),
+                  _infoLine(context, 'الرقم المدني: ${student.civilRegistryNumber}'),
+                  _infoLine(context, 'اسم الأب: ${student.fatherName}'),
+                  _infoLine(context, 'وظيفة الأب: ${student.fatherJob}'),
+                  _infoLine(context, 'اسم الأم: ${student.motherName}'),
+                  _infoLine(context, 'اسم الجد: ${student.grandFatherName}'),
+                  _infoLine(context, 'المواليد: ${student.dateOfBirth}'),
+                  _infoLine(context, 'مكان الولادة: ${student.birthPlace}'),
+                  _infoLine(context, 'مكان القيد المدني: ${student.civilRegistryPlace}'),
+                  _infoLine(context, 'الجنسية: ${student.nationality}'),
+                  _infoLine(context, 'تاريخ الانتساب: ${student.schoolEnrollmentDate}'),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}
   Widget _infoLine(BuildContext context, String text) {
     final textColor =
         Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;

@@ -20,13 +20,21 @@ class StudentScreen extends StatelessWidget {
       builder: (controller) {
         return Scaffold(
           backgroundColor: backgroundColor,
-          drawer: ProfileScreen(),
+
           appBar: AppBar(
             backgroundColor: Colors.green[800],
             elevation: 0,
             toolbarHeight: 120,
             iconTheme: const IconThemeData(color: Colors.white),
             actions: [
+            
+              IconButton(
+                icon: const Icon(Icons.person, color: Colors.white, size: 28),
+                onPressed: () {
+                  final studentId = Get.arguments;
+                  Get.toNamed(Routes.profile, arguments: studentId);
+                },
+              ),
               IconButton(
                 onPressed: () => Get.toNamed('/settingsPage'),
                 icon: const Icon(Icons.settings, color: Colors.white, size: 26),

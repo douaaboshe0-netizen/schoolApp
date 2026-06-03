@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,7 +17,7 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await SharedPreferences.getInstance();
   // ← هذا السطر هو اللي بيخلي Flutter يقبل شهادة runasp.net
   HttpOverrides.global = MyHttpOverrides();
 

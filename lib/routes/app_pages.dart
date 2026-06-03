@@ -11,6 +11,7 @@ import '../views/setting_screen.dart';
 import '../views/record_screen.dart';
 import '../views/week_schedule_screen.dart';
 import '../views/calendar_screen.dart';
+import '../views/profile_screen.dart';
 
 import '../bindings/splash_binding.dart';
 import '../bindings/login_binding.dart';
@@ -19,6 +20,7 @@ import '../bindings/note_binding.dart';
 import '../bindings/task_binding.dart';
 import '../bindings/record_binding.dart';
 import '../bindings/calendar_binding.dart';
+import '../bindings/profile_binding.dart'; 
 
 import '../middlewares/auth_middleware.dart';
 
@@ -34,6 +36,7 @@ class Routes {
   static const studentRecord = '/studentRecord';
   static const weekPage = '/weekPage';
   static const calendarPage = '/calendarPage';
+  static const profile = '/profile'; 
 }
 
 class AppPages {
@@ -77,6 +80,12 @@ class AppPages {
       name: Routes.calendarPage,
       page: () => CalendarScreen(),
       binding: CalendarBinding(),
+    ),
+  
+    GetPage(
+      name: Routes.profile, 
+      page: () => const ProfileScreen(), 
+      binding: ProfileBinding(), 
     ),
   ];
 }
